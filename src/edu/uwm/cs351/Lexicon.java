@@ -191,6 +191,7 @@ public class Lexicon extends AbstractSet<String> {
 				lag.left = n;
 			++numNodes;
 			result = true;
+			++version;
 		}
 		// XXX: Something is missing from this code that is needed for Homework #9
 		assert wellFormed() : "invariant false at end of add()";
@@ -281,20 +282,38 @@ public class Lexicon extends AbstractSet<String> {
 			// TODO Set up an iterator starting with given (non-null) string.
 			// NB: Do not attempt to use {@link #getNext} or any other method 
 			// of the main class to help.  All the work needs to be done here 
-			// so that the pending stack is set up correctly.
+			// so that the pending stack is set up correctly.	
+		    for (Node n = root;n != null;n = n.left) pending.push(n);    
+		    current = !pending.isEmpty() ? pending.pop() : null;
+		    if (current != null && current.right != null) {
+		        for (Node t = current.right;t != null;t = t.left) pending.push(t);       
+		    }
 			assert wellFormed() : "Iterator messed up after special constructor";
 		}
 
 		@Override
 		public boolean hasNext() {
 			// TODO Auto-generated method stub
-			return false;
+			checkVersion();
+		    return current != null;
 		}
 
 		@Override
 		public String next() {
 			// TODO Auto-generated method stub
-			return null;
+			checkVersion(); // Ensure modifications are detected
+		    if (!hasNext()) throw new NoSuchElementException("No more elements");
+		    String r = current.string;
+		    if (!pending.isEmpty()) {
+		        current = pending.pop();
+		        if (current.right != null) {
+		        	for (Node t = current.right;t != null;t = t.left) pending.push(t);
+		        }
+		    } else {
+		        current = null;
+		    }
+
+		    return r;
 		}
 
 		// TODO: Complete the iterator class
