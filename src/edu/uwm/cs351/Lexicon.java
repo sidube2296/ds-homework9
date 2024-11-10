@@ -283,11 +283,29 @@ public class Lexicon extends AbstractSet<String> {
 			// NB: Do not attempt to use {@link #getNext} or any other method 
 			// of the main class to help.  All the work needs to be done here 
 			// so that the pending stack is set up correctly.	
-		    for (Node n = root;n != null;n = n.left) pending.push(n);    
-		    current = !pending.isEmpty() ? pending.pop() : null;
-		    if (current != null && current.right != null) {
-		        for (Node t = current.right;t != null;t = t.left) pending.push(t);       
-		    }
+			Node n = root;
+			while (n != null) {
+			    int cmp = initial.compareTo(n.string);
+			    if (cmp < 0) {
+			        pending.push(n);
+			        n = n.left;
+			    } else if (cmp > 0) {
+			        n = n.right;
+			    } else {
+			        current = n;
+			        break;
+			    }
+			}
+			if (current == null && !pending.isEmpty()) {
+			    do {
+			        current = pending.pop();
+			    } while (!pending.isEmpty() && current.string.compareTo(initial) < 0);
+			    if (current.string.compareTo(initial) < 0) current = null;
+			}
+
+			if (current != null && current.right != null) {
+			    for(n = current.right;n != null;n = n.left) pending.push(n);			    
+			}
 			assert wellFormed() : "Iterator messed up after special constructor";
 		}
 
