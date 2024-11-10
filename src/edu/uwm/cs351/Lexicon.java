@@ -133,8 +133,13 @@ public class Lexicon extends AbstractSet<String> {
 		// TODO: Implement this method using the special iterator constructor.
 		// HINT: If you add "\0" to the string and look for it with the iterator, 
 		// you are most of the way there.
-		
-		    return null;
+		if (str == null) throw new NullPointerException("Input string cannot be null");
+	    Iterator<String> it = iterator(str + "\0");
+	    if (it.hasNext()) {
+	        return it.next();
+	    }
+	    return null;
+
 	}
 	
 	/**
