@@ -117,7 +117,9 @@ public class Lexicon extends AbstractSet<String> {
 	public String getMin() {
 		assert wellFormed() : "invariant false at start of getMin()";
 		// TODO: Implement this method using an iterator.
-		return null;
+		Iterator<String> it = iterator();
+	    if (it.hasNext()) return it.next();
+	    return null;
 	}
 	
 	/**
@@ -131,7 +133,8 @@ public class Lexicon extends AbstractSet<String> {
 		// TODO: Implement this method using the special iterator constructor.
 		// HINT: If you add "\0" to the string and look for it with the iterator, 
 		// you are most of the way there.
-		return null;
+		
+		    return null;
 	}
 	
 	/**
@@ -154,6 +157,7 @@ public class Lexicon extends AbstractSet<String> {
 		if (consumer == null) throw new NullPointerException("Can't accept into null consumer");
 		if (prefix == null) throw new NullPointerException("Prefix can't be null");
 		// TODO: Implement this method with the special iterator, not with recursion.
+		
 	}
 	
 	// Do not override "toArray" -- inherited version will work fine
