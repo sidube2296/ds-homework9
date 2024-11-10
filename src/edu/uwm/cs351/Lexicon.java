@@ -162,6 +162,15 @@ public class Lexicon extends AbstractSet<String> {
 		if (consumer == null) throw new NullPointerException("Can't accept into null consumer");
 		if (prefix == null) throw new NullPointerException("Prefix can't be null");
 		// TODO: Implement this method with the special iterator, not with recursion.
+		Iterator<String> it = iterator(prefix);
+	    while (it.hasNext()) {
+	        String s = it.next();
+	        if (s.startsWith(prefix)) {
+	            consumer.accept(s);
+	        } else {
+	            break;
+	        }
+	    }
 		
 	}
 	
@@ -328,7 +337,7 @@ public class Lexicon extends AbstractSet<String> {
 		@Override
 		public String next() {
 			// TODO Auto-generated method stub
-			checkVersion(); // Ensure modifications are detected
+			checkVersion();
 		    if (!hasNext()) throw new NoSuchElementException("No more elements");
 		    String r = current.string;
 		    if (!pending.isEmpty()) {
@@ -344,6 +353,8 @@ public class Lexicon extends AbstractSet<String> {
 		}
 
 		// TODO: Complete the iterator class
+		
+		
 	}
 	
 	/**
