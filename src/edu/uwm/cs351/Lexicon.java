@@ -170,8 +170,7 @@ public class Lexicon extends AbstractSet<String> {
 	        } else {
 	            break;
 	        }
-	    }
-		
+	    }		
 	}
 	
 	// Do not override "toArray" -- inherited version will work fine
@@ -218,9 +217,7 @@ public class Lexicon extends AbstractSet<String> {
 	
 	// TODO: some efficiency overrides (and at least one recursive helper method) are needed.
 	
-	// The following two helper methods are used for the iterators
-	// invariant checker.  Do not change.
-	
+
 	private boolean isNextGreaterAncestor(Node n, Node a) {
 		Node p = a == null ? root : a.left;
 		while (p != null) {
@@ -301,59 +298,45 @@ public class Lexicon extends AbstractSet<String> {
 			// NB: Do not attempt to use {@link #getNext} or any other method 
 			// of the main class to help.  All the work needs to be done here 
 			// so that the pending stack is set up correctly.	
-			Node n = root;
-			while (n != null) {
-			    int cmp = initial.compareTo(n.string);
-			    if (cmp < 0) {
-			        pending.push(n);
-			        n = n.left;
-			    } else if (cmp > 0) {
-			        n = n.right;
-			    } else {
-			        current = n;
-			        break;
-			    }
-			}
-			if (current == null && !pending.isEmpty()) {
-			    do {
-			        current = pending.pop();
-			    } while (!pending.isEmpty() && current.string.compareTo(initial) < 0);
-			    if (current.string.compareTo(initial) < 0) current = null;
-			}
-
-			if (current != null && current.right != null) {
-			    for(n = current.right;n != null;n = n.left) pending.push(n);			    
-			}
+			if (initial == null) throw new NullPointerException("Start string cannot be null");
+		    Node n = root;
+		    while (n != null) {
+		        int cmp = initial.compareTo(n.string);
+		        if (cmp <= 0) {
+		            pending.push(n);
+		            n = n.left;
+		        } else {
+		            n = n.right;
+		        }
+		    }
 			assert wellFormed() : "Iterator messed up after special constructor";
 		}
 
-		@Override
+		@Override //required
 		public boolean hasNext() {
 			// TODO Auto-generated method stub
 			checkVersion();
-		    return current != null;
+		    return !pending.isEmpty();
 		}
 
-		@Override
+		@Override //required
 		public String next() {
 			// TODO Auto-generated method stub
 			checkVersion();
-		    if (!hasNext()) throw new NoSuchElementException("No more elements");
-		    String r = current.string;
-		    if (!pending.isEmpty()) {
-		        current = pending.pop();
-		        if (current.right != null) {
-		        	for (Node t = current.right;t != null;t = t.left) pending.push(t);
-		        }
-		    } else {
-		        current = null;
+		    if (!hasNext()) {
+		        throw new NoSuchElementException();
 		    }
-
-		    return r;
+		    current = pending.pop();
+		    String result = current.string;
+		    Node n = current.right;
+		    while (n != null) {
+		        pending.push(n);
+		        n = n.left;
+		    }
+		    return result;
 		}
 
 		// TODO: Complete the iterator class
-		
 		
 	}
 	
