@@ -216,19 +216,32 @@ public class Lexicon extends AbstractSet<String> {
 	}
 	
 	// TODO: some efficiency overrides (and at least one recursive helper method) are needed.
-	
+	@Override //required
+	public boolean contains(Object o) {
+	    if (!(o instanceof String)) return false;	    
+	    String s = (String) o;
+	    Node n = root;
+	    while (n != null) {
+	        int c = s.compareTo(n.string);
+	        if (c == 0) return true;
+	        else if (c < 0) n = n.left;
+	        else n = n.right;
+	    }
+	    return false;
+	}
 
 	@Override // Implementation
 	public boolean remove(Object obj) {
 	    assert wellFormed() : "Invariant failed at start of remove()";
 	    if (!(obj instanceof String)) return false;
-	    String target = (String) obj;
+	    String t = (String) obj;
 	    int oldSize = numNodes;
-	    root = doRemove(root, target);
+	    root = doRemove(root, t);
 	    assert wellFormed() : "Invariant failed at end of remove()";
 	    return oldSize > numNodes;
 	}
-
+	
+	//Helper method for remove
 	private Node doRemove(Node n, String s) {
 	    if (n == null) {
 	        return null;
