@@ -218,6 +218,49 @@ public class Lexicon extends AbstractSet<String> {
 	// TODO: some efficiency overrides (and at least one recursive helper method) are needed.
 	
 
+	@Override // Implementation
+	public boolean remove(Object obj) {
+	    assert wellFormed() : "Invariant failed at start of remove()";
+	    if (!(obj instanceof String)) return false;
+	    String target = (String) obj;
+	    int oldSize = numNodes;
+	    root = doRemove(root, target);
+	    assert wellFormed() : "Invariant failed at end of remove()";
+	    return oldSize > numNodes;
+	}
+
+	private Node doRemove(Node n, String s) {
+	    if (n == null) {
+	        return null;
+	    }
+	    int c = s.compareTo(n.string);
+	    if (c < 0) {
+	        n.left = doRemove(n.left, s);
+	    } else if (c > 0) {
+	        n.right = doRemove(n.right, s);
+	    } else {
+	        if (n.left == null) {
+	            version++;
+	            numNodes--;
+	            return n.right;
+	        }
+	        if (n.right == null) {
+	            version++;
+	            numNodes--;
+	            return n.left;
+	        }
+	        Node p = n.left;
+	        while (p.right != null) {
+	            p = p.right;
+	        }
+	        n.string = p.string;
+	        n.left = doRemove(n.left, p.string);
+	    }
+
+	    return n;
+	}
+
+
 	private boolean isNextGreaterAncestor(Node n, Node a) {
 		Node p = a == null ? root : a.left;
 		while (p != null) {
@@ -298,16 +341,13 @@ public class Lexicon extends AbstractSet<String> {
 			// NB: Do not attempt to use {@link #getNext} or any other method 
 			// of the main class to help.  All the work needs to be done here 
 			// so that the pending stack is set up correctly.	
-			if (initial == null) throw new NullPointerException("Start string cannot be null");
-		    Node n = root;
-		    while (n != null) {
-		        int cmp = initial.compareTo(n.string);
-		        if (cmp <= 0) {
+			if (initial == null) throw new NullPointerException("String is null");
+		    for(Node n = root;n != null;) {
+		        int c = initial.compareTo(n.string);
+		        if (c <= 0) {
 		            pending.push(n);
 		            n = n.left;
-		        } else {
-		            n = n.right;
-		        }
+		        } else n = n.right;
 		    }
 			assert wellFormed() : "Iterator messed up after special constructor";
 		}
@@ -323,20 +363,25 @@ public class Lexicon extends AbstractSet<String> {
 		public String next() {
 			// TODO Auto-generated method stub
 			checkVersion();
-		    if (!hasNext()) {
-		        throw new NoSuchElementException();
-		    }
+			assert wellFormed() : "Invariant failed at start of next():";
+		    if (!hasNext()) throw new NoSuchElementException("No element in Iterator");
 		    current = pending.pop();
-		    String result = current.string;
-		    Node n = current.right;
-		    while (n != null) {
-		        pending.push(n);
-		        n = n.left;
-		    }
-		    return result;
+		    for(Node n = current.right;n != null;n = n.left) pending.push(n);
+		    assert wellFormed() : "Invariant failed at end of next():";
+		    return current.string;
 		}
 
 		// TODO: Complete the iterator class
+		@Override //required
+		public void remove() {
+		    checkVersion();
+		    assert wellFormed() : "Invariant failed at start of remove()";
+		    if (current == null) throw new IllegalStateException("Current is null");
+		    Lexicon.this.remove(current.string); 
+		    colVersion = version; 
+		    current=null;
+		    assert wellFormed() : "Invariant failed violated at end of remove()";
+		}
 		
 	}
 	
